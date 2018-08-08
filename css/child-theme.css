@@ -10794,3 +10794,11 @@ a.skip-link {
 
 .gallery-caption {
   display: block; }
+
+.bg-navbar {
+  background: rgba(20, 69, 115, 0.8);
+  float: left;
+  min-width: 100%; }
+
+.navbar-dark .navbar-nav .nav-link {
+  color: white; }
