@@ -25,10 +25,6 @@ var autoprefixer = require( 'gulp-autoprefixer' );
 var cfg = require( './gulpconfig.json' );
 var paths = cfg.paths;
 
-gulp.task( 'watch-scss', ['browser-sync'], function() {
-    gulp.watch( paths.sass + '/**/*.scss', ['scss-for-dev'] );
-});
-
 // Run:
 // gulp sass
 // Compiles SCSS files in CSS
@@ -40,11 +36,10 @@ gulp.task( 'sass', function() {
                 this.emit( 'end' );
             }
         } ) )
-        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe( sass( { errLogToConsole: true } ) )
         .pipe( autoprefixer( 'last 2 versions' ) )
-        .pipe(sourcemaps.write(undefined, { sourceRoot: null }))
         .pipe( gulp.dest( paths.css ) )
+        .pipe( rename( 'custom-editor-style.css' ) );
     return stream;
 });
 
@@ -53,18 +48,10 @@ gulp.task( 'sass', function() {
 // Starts watcher. Watcher runs gulp sass task on changes
 gulp.task( 'watch', function() {
     gulp.watch( paths.sass + '/**/*.scss', ['styles'] );
-    gulp.watch( [paths.dev + '/js/**/*.js', 'js/**/*.js', '!js/theme.js', '!js/theme.min.js'], ['scripts'] );
+    gulp.watch( [paths.dev + '/js/**/*.js', 'js/**/*.js', '!js/child-theme.js', '!js/child-theme.min.js'], ['scripts'] );
 
     //Inside the watch task.
     gulp.watch( paths.imgsrc + '/**', ['imagemin-watch'] );
-});
-
-/**
- * Ensures the 'imagemin' task is complete before reloading browsers
- * @verbose
- */
-gulp.task( 'imagemin-watch', ['imagemin'], function( ) {
-  browserSync.reload();
 });
 
 // Run:
@@ -76,11 +63,20 @@ gulp.task( 'imagemin', function() {
     .pipe( gulp.dest( paths.img ) );
 });
 
+/**
+ * Ensures the 'imagemin' task is complete before reloading browsers
+ * @verbose
+ */
+gulp.task( 'imagemin-watch', ['imagemin'], function( ) {
+  browserSync.reload();
+
+});
+
 // Run:
 // gulp cssnano
 // Minifies CSS files
 gulp.task( 'cssnano', function() {
-  return gulp.src( paths.css + '/theme.css' )
+  return gulp.src( paths.css + '/child-theme.css' )
     .pipe( sourcemaps.init( { loadMaps: true } ) )
     .pipe( plumber( {
             errorHandler: function( err ) {
@@ -95,7 +91,7 @@ gulp.task( 'cssnano', function() {
 });
 
 gulp.task( 'minifycss', function() {
-  return gulp.src( paths.css + '/theme.css' )
+  return gulp.src( paths.css + '/child-theme.css' )
   .pipe( sourcemaps.init( { loadMaps: true } ) )
     .pipe( cleanCSS( { compatibility: '*' } ) )
     .pipe( plumber( {
@@ -111,7 +107,7 @@ gulp.task( 'minifycss', function() {
 
 gulp.task( 'cleancss', function() {
   return gulp.src( paths.css + '/*.min.css', { read: false } ) // Much faster
-    .pipe( ignore( 'theme.css' ) )
+    .pipe( ignore( 'child-theme.css' ) )
     .pipe( rimraf() );
 });
 
@@ -150,18 +146,18 @@ gulp.task( 'scripts', function() {
         paths.dev + '/js/custom-javascript.js'
     ];
   gulp.src( scripts )
-    .pipe( concat( 'theme.min.js' ) )
+    .pipe( concat( 'child-theme.min.js' ) )
     .pipe( uglify() )
     .pipe( gulp.dest( paths.js ) );
 
   gulp.src( scripts )
-    .pipe( concat( 'theme.js' ) )
+    .pipe( concat( 'child-theme.js' ) )
     .pipe( gulp.dest( paths.js ) );
 });
 
 // Deleting any file inside the /src folder
-gulp.task( 'clean-source', function() {
-  return del( ['src/**/*'] );
+gulp.task('clean-source', function () {
+  return del(['src/**/*',]);
 });
 
 // Run:
@@ -190,6 +186,7 @@ gulp.task( 'copy-assets', function() {
     gulp.src( paths.node + 'font-awesome/scss/*.scss' )
         .pipe( gulp.dest( paths.dev + '/sass/fontawesome' ) );
 
+
 // _s SCSS files
     gulp.src( paths.node + 'undescores-for-npm/sass/media/*.scss' )
         .pipe( gulp.dest( paths.dev + '/sass/underscores' ) );
@@ -203,6 +200,11 @@ gulp.task( 'copy-assets', function() {
         .pipe( gulp.dest( paths.js + paths.vendor ) );
     gulp.src( paths.node + 'popper.js/dist/umd/popper.js' )
         .pipe( gulp.dest( paths.js + paths.vendor ) );
+
+// UnderStrap SCSS files
+    gulp.src( paths.node + 'understrap/sass/**/*.scss' )
+        .pipe( gulp.dest( paths.dev + '/sass/understrap' ) );    
+
     return stream;
 });
 
